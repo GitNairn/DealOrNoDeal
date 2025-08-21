@@ -10,7 +10,7 @@ namespace DealOrNoDealForm
         private Dictionary<int, float> BoxValues = Enumerable.Range(0, 22)
             .ToDictionary(i => i, i => 0.0f);
         private List<Label> ValueLabels = new List<Label>();
-        //private TextBox textBox;
+        Label previousLabel;
         TextBox textBox = new TextBox
         {
             Location = new Point(650, 50),
@@ -48,7 +48,7 @@ namespace DealOrNoDealForm
                     String valueText = "";
                     if (Values[i * 11 + j] < 1)
                     {
-                        float tempVal = Values[i * 11 +j ] * 100;
+                        float tempVal = Values[i * 11 + j] * 100;
                         valueText = $"{tempVal}p";
                     }
                     else
@@ -72,7 +72,7 @@ namespace DealOrNoDealForm
             }
             this.Controls.Add(textBox);
 
-            for (int i= 0; i< BoxValues.Count; i++)
+            for (int i = 0; i < BoxValues.Count; i++)
             {
                 Random random = new Random();
                 float boxValue = Values[random.Next(0, Values.Count)];
@@ -89,7 +89,8 @@ namespace DealOrNoDealForm
                         Text = $"{i * 6 + j + 1}",
                         Location = new Point(10 + j * 100, 10 + i * 100),
                         Size = new Size(80, 80),
-                        BackColor = Color.Red
+                        BackColor = Color.Red,
+                        Font = new Font("Arial", 16, FontStyle.Bold),
                     };
                     button.Click += (s, args) => ButtonClick(s, args);
                     this.Controls.Add(button);
@@ -102,7 +103,8 @@ namespace DealOrNoDealForm
                     Text = $"{i + 19}",
                     Location = new Point(110 + i * 100, 310),
                     Size = new Size(80, 80),
-                    BackColor = Color.Red
+                    BackColor = Color.Red,
+                    Font = new Font("Arial", 16, FontStyle.Bold),
                 };
                 button.Click += (s, args) => ButtonClick(s, args);
                 this.Controls.Add(button);
@@ -119,16 +121,17 @@ namespace DealOrNoDealForm
                 Label userBoxLabel = new Label
                 {
                     Text = $"Your Box:",
-                    Location = new Point(750, 100),
-                    Size = new Size(500, 50),
+                    Location = new Point(820, 80),
+                    Size = new Size(150, 200),
                     Font = new Font("Arial", 20, FontStyle.Bold),
                     ForeColor = Color.White,
                     BackColor = Color.Black,
                     TextAlign = ContentAlignment.MiddleCenter
                 };
+                this.Controls.Add(userBoxLabel);
                 NumOfBoxesClicked++;
                 textBox.Text = "You have selected box " + button.Text + ". Now, please select 5 boxes to open.";
-                return;  
+                return;
             }
             if (button != null)
             {
@@ -177,7 +180,7 @@ namespace DealOrNoDealForm
             else
             {
                 value *= 100;
-                text = $"{value}p";  
+                text = $"{value}p";
             }
             int labelWidth = 80;
             int labelHeight = 30;
@@ -200,12 +203,59 @@ namespace DealOrNoDealForm
                     ValueLabels[i].Dispose();
                 }
             }
+            if (previousLabel != null)
+            {
+                previousLabel.Dispose();
+            }
+            previousLabel = valueLabel;
         }
 
         private void BankerOffer()
         {
             textBox.Text = "The banker is making an offer.";
-            MessageBox.Show("Banker Offer", "Banker Offer", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            //string projectDir = Directory.GetParent(Application.StartupPath).Parent.Parent.Parent.FullName;
+            //string imgPath = Path.Combine(projectDir, "Media", "phone.jpg");
+            //PictureBox bankerImage = new PictureBox
+            //{
+            //    Image = Image.FromFile(imgPath), // Ensure you have a banker image in the project directory
+            //    Location = new Point(650, 200),
+            //    Size = new Size(200, 200),
+            //    SizeMode = PictureBoxSizeMode.StretchImage
+            //};
+            //bankerImage.Click += (s, args) =>
+            //{
+            //    bankerImage.Dispose();
+            float offer = CalculateBankerOffer();
+            if (DialogResult.Yes == MessageBox.Show($"The banker offers you £{offer}. Do you accept?", "Banker's Offer",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question))
+            {
+                textBox.Text = $"You accepted the offer of £{offer}. Thank you for playing!";
+            }
+            else
+            {
+                textBox.Text = "You declined the offer. Please continue selecting boxes.";
+            }
+        }
+
+        private float CalculateBankerOffer()
+        {
+            float bankerOffer = 0;
+            foreach (var value in BoxValues.Values)
+            {
+                bankerOffer += value;
+            }
+            bankerOffer /= BoxValues.Count;
+            bankerOffer *= 0.2f + (float) NumOfBoxesClicked/40;
+            bankerOffer = RoundToSignificantFigures(bankerOffer, 2);
+            return bankerOffer;
+        }
+
+        private float RoundToSignificantFigures(float value, int significantFigures)
+        {
+            if (value == 0)
+                return 0;
+            float scale = (float)Math.Pow(10, significantFigures - (int)Math.Floor(Math.Log10(Math.Abs(value))));
+            return (float)Math.Round(value * scale) / scale;
         }
     }
 }
