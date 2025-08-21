@@ -17,8 +17,48 @@ namespace DealOrNoDealForm
 
         private void DONDForm_Load(object sender, EventArgs e)
         {
-            // Initialize the form or load resources here if needed
-            this.BackColor = Color.Black; // Example of setting a property
+            this.BackColor = Color.Black;
+
+            for (int i = 0; i < 2; i++)
+            {
+                Color bgColor = Color.Blue;
+                if (i == 1)
+                {
+                    bgColor = Color.Red;
+                }
+                for (int j = 0; j < 11; j++)
+                {
+                    Label label = new Label
+                    {
+                        Text = $"{Values[i * 11 + j]}",
+                        Location = new Point(10 + j * 100, 400 + i * 30),
+                        Size = new Size(80, 20),
+                        Font = new Font("Arial", 10, FontStyle.Bold),
+                        ForeColor = Color.White,
+                        BackColor = bgColor,
+                        TextAlign = ContentAlignment.MiddleCenter
+                    };
+                    this.Controls.Add(label);
+                }
+            }
+                
+
+            TextBox textBox = new TextBox
+            {
+                Location = new Point(700, 50),
+                Size = new Size(500, 200),
+                Font = new Font("Arial", 20, FontStyle.Bold),
+                ForeColor = Color.Black,
+                BackColor = Color.DarkGray,
+                Multiline = true,
+                ReadOnly = true,
+                TextAlign = HorizontalAlignment.Center,
+                Text = "Welcome to Deal or No Deal!" + Environment.NewLine +
+                       "Please select a box to start with",
+                SelectionStart = 0
+            };
+            this.Controls.Add(textBox);
+
             for (int i= 0; i< BoxValues.Count; i++)
             {
                 Random random = new Random();
