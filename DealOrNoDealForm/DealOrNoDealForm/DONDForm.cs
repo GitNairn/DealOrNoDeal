@@ -45,21 +45,11 @@ namespace DealOrNoDealForm
                 }
                 for (int j = 0; j < 11; j++)
                 {
-                    String valueText = "";
-                    if (Values[i * 11 + j] < 1)
-                    {
-                        float tempVal = Values[i * 11 + j] * 100;
-                        valueText = $"{tempVal}p";
-                    }
-                    else
-                    {
-                        valueText = $"£{Values[i * 11 + j]}";
-                    }
-
+                    String valueText = GetMoneyText(Values[i * 11 + j]);
                     Label label = new Label
                     {
                         Text = valueText,
-                        Location = new Point(10 + j * 100, 400 + i * 30),
+                        Location = new Point(10 + j * 100, 420 + i * 30),
                         Size = new Size(80, 20),
                         Font = new Font("Arial", 10, FontStyle.Bold),
                         ForeColor = Color.White,
@@ -142,12 +132,13 @@ namespace DealOrNoDealForm
             NumOfBoxesClicked++;
             textBox.SelectionLength = 0;
             int addition = 0;
-            if (NumOfBoxesClicked == BankerInterval && NumOfBoxesClicked < 15)
+            BoxValues.Remove(Int32.Parse(button.Text) - 1); // Remove the box value from the dictionary
+            if (NumOfBoxesClicked == BankerInterval && NumOfBoxesClicked < 18)
             {
                 BankerOffer();
                 addition = 3;
             }
-            else if (NumOfBoxesClicked == BankerInterval && NumOfBoxesClicked >= 15)
+            else if (NumOfBoxesClicked == BankerInterval && NumOfBoxesClicked >= 18)
             {
                 BankerOffer();
                 addition = 1;
@@ -166,21 +157,12 @@ namespace DealOrNoDealForm
         private void ShowValue(int boxNumber, object sender)
         {
             Button button = sender as Button;
-            String text = "";
             float value = BoxValues[boxNumber];
+            String text = GetMoneyText(value);
             Color bgColor = Color.Blue;
             if (value > 750)
             {
                 bgColor = Color.Red;
-            }
-            if (value >= 1)
-            {
-                text = $"£{value}";
-            }
-            else
-            {
-                value *= 100;
-                text = $"{value}p";
             }
             int labelWidth = 80;
             int labelHeight = 30;
@@ -212,24 +194,21 @@ namespace DealOrNoDealForm
 
         private void BankerOffer()
         {
-            textBox.Text = "The banker is making an offer.";
-            //string projectDir = Directory.GetParent(Application.StartupPath).Parent.Parent.Parent.FullName;
-            //string imgPath = Path.Combine(projectDir, "Media", "phone.jpg");
-            //PictureBox bankerImage = new PictureBox
-            //{
-            //    Image = Image.FromFile(imgPath), // Ensure you have a banker image in the project directory
-            //    Location = new Point(650, 200),
-            //    Size = new Size(200, 200),
-            //    SizeMode = PictureBoxSizeMode.StretchImage
-            //};
-            //bankerImage.Click += (s, args) =>
-            //{
-            //    bankerImage.Dispose();
+            textBox.Text = $"The banker is making an offer. {Values.Count}";
             float offer = CalculateBankerOffer();
-            if (DialogResult.Yes == MessageBox.Show($"The banker offers you £{offer}. Do you accept?", "Banker's Offer",
+            if (DialogResult.Yes == MessageBox.Show($"The banker offers you {GetMoneyText(offer)}. Do you accept?", "Banker's Offer",
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question))
             {
-                textBox.Text = $"You accepted the offer of £{offer}. Thank you for playing!";
+                textBox.Text = $"You accepted the offer of {GetMoneyText(offer)}. Thank you for playing!";
+                MessageBox.Show($"Congratulations! You won {GetMoneyText(offer)}!", "Game Over", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Application.Exit();
+            }
+            else if (BoxValues.Count == 1)
+            {
+                float finalValue = BoxValues.First().Value;
+                textBox.Text = $"You have only one box left. You win {GetMoneyText(finalValue)}. Thank you for playing!";
+                MessageBox.Show($"Congratulations! You won {GetMoneyText(finalValue)}!", "Game Over", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Application.Exit();
             }
             else
             {
@@ -240,12 +219,12 @@ namespace DealOrNoDealForm
         private float CalculateBankerOffer()
         {
             float bankerOffer = 0;
-            foreach (var value in BoxValues.Values)
+            foreach (float value in BoxValues.Values)
             {
                 bankerOffer += value;
             }
             bankerOffer /= BoxValues.Count;
-            bankerOffer *= 0.2f + (float) NumOfBoxesClicked/40;
+            bankerOffer *= 0.18f;
             bankerOffer = RoundToSignificantFigures(bankerOffer, 2);
             return bankerOffer;
         }
@@ -256,6 +235,18 @@ namespace DealOrNoDealForm
                 return 0;
             float scale = (float)Math.Pow(10, significantFigures - (int)Math.Floor(Math.Log10(Math.Abs(value))));
             return (float)Math.Round(value * scale) / scale;
+        }
+
+        private String GetMoneyText(float value)
+        {
+            if (value < 1)
+            {
+                return $"{value * 100}p";
+            }
+            else
+            {
+                return $"£{value}";
+            }
         }
     }
 }
