@@ -11,6 +11,7 @@ namespace DealOrNoDealForm
             .ToDictionary(i => i, i => 0.0f);
         private List<Label> ValueLabels = new List<Label>();
         Label previousLabel;
+        Button UsersButton;
         TextBox textBox = new TextBox
         {
             Location = new Point(650, 50),
@@ -119,6 +120,7 @@ namespace DealOrNoDealForm
                     TextAlign = ContentAlignment.MiddleCenter
                 };
                 this.Controls.Add(userBoxLabel);
+                UsersButton = button;
                 NumOfBoxesClicked++;
                 textBox.Text = "You have selected box " + button.Text + ". Now, please select 5 boxes to open.";
                 return;
@@ -203,10 +205,12 @@ namespace DealOrNoDealForm
                 MessageBox.Show($"Congratulations! You won {GetMoneyText(offer)}!", "Game Over", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 Application.Exit();
             }
-            else if (BoxValues.Count == 1)
+            else if (BoxValues.Count == 2)
             {
                 float finalValue = BoxValues.First().Value;
-                textBox.Text = $"You have only one box left. You win {GetMoneyText(finalValue)}. Thank you for playing!";
+                ShowValue(BoxValues.First().Key, UsersButton);
+                UsersButton.Dispose();
+                textBox.Text = $"Congradulations! Your box had {GetMoneyText(finalValue)}. Thank you for playing!";
                 MessageBox.Show($"Congratulations! You won {GetMoneyText(finalValue)}!", "Game Over", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 Application.Exit();
             }
@@ -224,7 +228,7 @@ namespace DealOrNoDealForm
                 bankerOffer += value;
             }
             bankerOffer /= BoxValues.Count;
-            bankerOffer *= 0.18f;
+            bankerOffer *= 0.22f + (NumOfBoxesClicked/50);
             bankerOffer = RoundToSignificantFigures(bankerOffer, 2);
             return bankerOffer;
         }
