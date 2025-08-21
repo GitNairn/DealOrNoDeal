@@ -72,7 +72,7 @@ namespace DealOrNoDealForm
             Button button = sender as Button;
             String text = "";
             float value = BoxValues[boxNumber];
-            Color bgColor = Color.DarkBlue;
+            Color bgColor = Color.Blue;
             if (value > 750)
             {
                 bgColor = Color.Red;
@@ -87,14 +87,20 @@ namespace DealOrNoDealForm
             {
                 text = $"£{value}";
             }
+            int labelWidth = 80;
+            int labelHeight = 30;
             Label valueLabel = new Label
             {
                 Text = text,
-                Location = button.Location,
-                Size = new Size(80, 80),
+                Location = new Point(button.Location.X + (button.Width - labelWidth) / 2,
+                        button.Location.Y + (button.Height - labelHeight) / 2),
+                Size = new Size(80, 20),
                 Font = new Font("Arial", 12, FontStyle.Bold),
-                BackColor = bgColor
+                ForeColor = Color.White,
+                BackColor = bgColor,
+                TextAlign = ContentAlignment.MiddleCenter
             };
+            this.Controls.Add(valueLabel);
         }
     }
 }
